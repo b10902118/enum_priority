@@ -20,7 +20,7 @@ long double C[N];
 int T[N];
 
 const int THREAD_COUNT = 40;
-const int LOG_STEP = 10000;
+// const int LOG_STEP = 10000;
 
 long double g_R_sum{numeric_limits<long double>::infinity()};
 long long g_count{0};
@@ -95,7 +95,7 @@ void enumerate_by_prefix(const vector<int> &prefix) {
   int P[N];
   int idx = prefix.size();
 
-  // init p
+  // init P
   copy(prefix.begin(), prefix.end(), P);
   for (int i = 0; i < N; ++i) {
     if (!in(i, prefix))
@@ -104,43 +104,19 @@ void enumerate_by_prefix(const vector<int> &prefix) {
 
   int counter = 0;
   long double R_sum = numeric_limits<long double>::infinity();
-  // cout << "prefix size " << prefix.size() << endl;
-  /*
-  for (int i = 0; i < N; ++i)
-    cout << P[i] << " ";
-  cout << endl;
-  */
 
-  // mt19937 rng(random_device{}());
   do {
-    // shuffle(P, P + N, rng);
-    /*
-for (int i = 0; i < N; ++i)
-cout << P[i] << " ";
-    */
     auto sum = check(P);
     if (sum && *sum < R_sum) {
       R_sum = *sum;
     }
-
-    if (++counter % LOG_STEP == 0) {
-      lock_guard<mutex> guard(g_mtx);
-      g_count += LOG_STEP;
-      if (R_sum < g_R_sum)
-        g_R_sum = R_sum;
-      else
-        R_sum = g_R_sum;
-      cout << g_count << ": " << g_R_sum << "\n";
-    }
-
+    ++counter;
   } while (next_permutation(P + prefix.size(), P + N));
 
   lock_guard<mutex> guard(g_mtx);
   g_count += counter;
   if (R_sum < g_R_sum)
     g_R_sum = R_sum;
-  else
-    R_sum = g_R_sum;
   cout << g_count << ": " << g_R_sum << "\n";
 }
 
